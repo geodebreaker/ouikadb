@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/geodebreaker/ouikadb/issues"
   },
-  "homepage": "https://github.com/geodebreaker/ouikadb#readme"
+  "homepage": "https://github.com/geodebreaker/ouikadb#readme",
+  "dependencies": {
+    "adm-zip": "^0.5.16"
+  }
 }

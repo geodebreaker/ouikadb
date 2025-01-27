@@ -1,5 +1,8 @@
 # Ouika DB
 
+Ouika DB is a small and lightweight database on the filesystem for small projects and small-scale data storage.
+Most databases work better than Ouika, but this is meant to be simple, not complex.
+
 ```js
 // -- BEFORE --
 // dbname.db/
@@ -53,21 +56,24 @@ import ouikadb as ouika // or this
 
 new ouika('path/to/db', 'dbname'); 
 // ^ Creates a handle to a DB, will create a DB if it does not exist
+ouika.fromZip(path, name, buffer) > handle 
+// ^ Open a handle to DB from a zip, will overwrite if a DB with the same name exists at path
 
 handle.db > node // Root folder
 handle.close() > null // Close handle
+handle.toZip() > buffer // Save & Serialize DB, pair with fs.writeFile to save
 
 // Files and folders are nodes
 
 // Structure
-node.add('name', 'value') > node // Create file within node, outputs created file
-node.add('name') > node // Create folder within node, outputs created folder
+node.add('name', value) > node // Create file within node, outputs created node or existing node
+node.add('name') > node // Create folder within node, outputs created node or existing node
 node.remove() > bool // Remove node from parent, outputs success
 node.remove('name') > bool // Remove child node named 'name', outputs success
-node.find('name') > node // Find child node named 'name', outputs child node
+node.find('name') > node // Find child node named 'name', outputs child node or false if it does not exist
 node.children[] > node // List of child nodes
 node.parent > node // Parent node 
-node.findIndex() > number // Find child node named 'name', outputs index of child node in node.children
+node.findIndex() > number // Find child node named 'name', outputs index of child node in node.children or -1 if it does not exist
 
 // Value
 get node.value > string // Returns value of file acociated with node, if folder, returns undefined

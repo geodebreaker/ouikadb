@@ -1,6 +1,7 @@
 const VERSION = require('./package.json')?.version || '1.0.0';
 const fs = require('fs');
 const Path = require('path');
+const Zip = require('adm-zip');
 
 class OuikaError extends Error {
   constructor(message) {
@@ -40,21 +41,29 @@ class ouika {
       this.db = new node(this, 'db', this._path, null, this.schema.structure);
     }
 
-    fs.writeFileSync(lastusedPath, (Date.now() + 60e3).toString())
-    this._interval = setInterval(x => {
+    fs.writeFileSync(lastusedPath, (Date.now() + 60e3).toString());
+    this._interval = setInterval(() =>
       fs.writeFileSync(lastusedPath, (Date.now() + 60e3).toString())
-    }, 59e3);
+      , 59e3);
 
     process.on('SIGINT', () => this.close(this));
     process.on('SIGTERM', () => this.close(this));
     process.on('beforeExit', () => this.close(this));
   }
 
-  close(x) {
+  close(x = this) {
     clearInterval(x._interval);
     if (fs.existsSync(Path.join(x._path, '.lastused')))
       fs.unlinkSync(Path.join(x._path, '.lastused'));
     delete this;
+  }
+
+  toZip() {
+    const lastusedPath = Path.join(this._path, '.lastused');
+    if (fs.existsSync(lastusedPath))
+      fs.unlinkSync(lastusedPath);
+    const zip = toZip(this._path);
+    fs.writeFileSync(lastusedPath, (Date.now() + 60e3).toString())
   }
 
   _update() {
@@ -196,5 +205,16 @@ function mkerror(h, x, n) {
   }
 }
 
-// ouika.make = make;
+function fromZip(path, name, buffer) {
+  const zip = new Zip(buffer);
+  zip.extractAllTo(Path.join(path, name + '.db'), true);
+}
+
+function toZip(path) {
+  const zip = new Zip();
+  zip.addLocalFolder(path);
+  return zip.toBuffer();
+}
+
+ouika.fromZip = fromZip;
 module.exports = ouika;
